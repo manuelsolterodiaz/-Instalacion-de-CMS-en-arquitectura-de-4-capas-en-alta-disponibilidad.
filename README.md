@@ -7,19 +7,19 @@ Contiene los ficheros VagrantFile y de aprovisionamiento necesarios para esta ta
 - Capa 4: Base de Datos (Dos servidores de base de datos con MariaDB)
 ## Índice
 
-1. [Introduccción](#id1)
-2. [Instalaciones y programas](#id2)
+1. [Introducción](#id1)
+2. [Programas y herramientas](#id2)
 3. [Scripts](#id3)
 
 # Introducción <a name="id1"></a>
 
-En esta práctica se va a realizar el despliegue de una aplicacion web que esta alojada en un repositorio público de GitHub en alta disponibiliadd.
+En esta práctica se va a realizar el despliegue de una aplicación web que está alojada en un repositorio público de GitHub en alta disponibilidad.
 
-La infraestructura montada en vagrant se monta un balanceador con Nginx, dos servidores de web , un servidor NFS con la aplicacion alojada en una carpeta a la que acceder los servidores para mostrarla en el navegador, después en la misma maquina hay instalado el motor de PHP-FPM (separa el proceso del PHP del servidor web mediante el protocolo FastCGI), seguidamente hay un servidor que actua de balanceador en los servidores de base de datos, se ha usado HAProxy, y por último dos servidores de base de datos donde se aloja la base de datos.
+La infraestructura montada en vagrant se monta un balanceador con Nginx, dos servidores de web , un servidor NFS con la aplicación alojada en una carpeta a la que acceder los servidores para mostrarla en el navegador, después en la misma máquina hay instalado el motor de PHP-FPM, seguidamente hay un servidor que actúa de balanceador en los servidores de base de datos, se ha utilizado HAProxy, y por último dos servidores de base de datos donde se aloja la base de datos.
 
 ### Direccionamiento
 
-Para esta practica se han usado las diferentes redes:
+Para esta práctica se han usado las diferentes redes:
 - Red publica balanceador: 192.168.10.0/24
 - Red privada servidores web: 192.168.20.0/24
 - Red privada nfs: 192.168.30.0/24
@@ -40,19 +40,22 @@ Para esta practica se han usado las diferentes redes:
 - Server HAProxy: Utiliza dos redes.
     - Red privada (rednfs): 192.168.30.0/24 - utiliza - 192.168.30.10
     - Red privada (reddatabase): 192.168.40.0/24 - utiliza - 192.168.40.10
-- Server DB1: Utiliza una unica red.
+- Server DB1: Utiliza una única red.
     - Red privada (reddatabase): 192.168.40.0/24 - utiliza - 192.168.40.11
-- Server DB2: Utiliza una unica red.
+- Server DB2: Utiliza una única red.
     - Red privada (reddatabase): 192.168.40.0/24 - utiliza - 192.168.40.12
 
-# Programas utilizados <a name="id2"></a>
-Programas/herramientas utilziados:
-- Vagrant/Virtualbix: para desplegar toda la infraestructura.
+# Programas / herramientas utilizados <a name="id2"></a>
+Programas/herramientas utilizados:
+- Vagrant/Virtualbox: para desplegar toda la infraestructura.
 - Nginx para el balanceador, servir la aplicación web.
 - Preprocesador PHP-FPM: sirven para gestionar de manera eficiente los procesos de PHP y optimizar significativamente el rendimiento de las aplicaciones web.
 - NFS: sirve para compartir archivos y directorios a través de una red, permitiendo que múltiples ordenadores (clientes) accedan a ellos como si estuvieran en su propio disco local.
 - HAProxy: se usa con bases de datos para distribuir las conexiones y consultas entre múltiples servidores de bases de datos.
-- MariaDB: utilizado somo sistema gestor de base de datos para poder guardar los registros de la aplicación.
+- MariaDB: utilizado como sistema gestor de base de datos para poder guardar los registros de la aplicación.
+- MariaDB-client: utilizado para acceder desde el server HAProxy a la base de datos.
+- Galera: para poder hacer el cluster de las base de datos.
+
 ## Scripts <a name="id3"></a>
 
 ## Orden para el correcto levantamiento/funcionamiento de las máquinas
