@@ -699,4 +699,4 @@ mysql -e "SHOW STATUS LIKE 'wsrep_%';" 2>/dev/null | grep -E "wsrep_cluster_size
 ```
 
 ## Video de correcto funcionamiento
-[Comprobación de funcionaminto de la aplicación web](URL_del_enlace)
+[Comprobación de funcionaminto de la aplicación web](https://drive.google.com/file/d/1PTzicyl0dDoKvC_mrXgNUmVKqYSySxmj/view?usp=sharing)
