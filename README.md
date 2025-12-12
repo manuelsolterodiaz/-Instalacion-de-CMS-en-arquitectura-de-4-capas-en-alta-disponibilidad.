@@ -692,3 +692,6 @@ mysql -e "SHOW STATUS LIKE 'wsrep_%';" 2>/dev/null | grep -E "wsrep_cluster_size
 
 ## Video de correcto funcionamiento <a name="id4"></a>
 [Comprobación de funcionamiento de la aplicación web](https://drive.google.com/file/d/1PTzicyl0dDoKvC_mrXgNUmVKqYSySxmj/view?usp=sharing)
+
+## Comprobación de galera clúster
+![Imagen de galera clúster](galera_cluster.png)
