@@ -2,7 +2,7 @@
 
 # Script de aprovisionamiento del Proxy de Base de Datos HAProxy
 # Capa 3 - Balanceador de bases de datos
-
+# Manuel Soltero Díaz
 
 echo "=== Actualizando sistema ==="
 apt-get update
