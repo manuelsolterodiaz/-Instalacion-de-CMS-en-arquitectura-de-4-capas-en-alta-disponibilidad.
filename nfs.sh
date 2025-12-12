@@ -1,79 +1,70 @@
 #!/bin/bash
 
-# Script de aprovisionamiento del Servidor de Base de Datos 2
-# Capa 4 - Datos (MariaDB Galera Cluster - Nodo 2)
+# Script de aprovisionamiento del Servidor NFS con PHP-FPM
+# Capa 2 - Backend (Almacenamiento compartido y motor PHP)
 # Manuel Soltero Díaz
 echo "=== Actualizando sistema ==="
 apt-get update
 
+echo "=== Instalando NFS Server, PHP-FPM y extensiones ==="
+apt-get install -y nfs-kernel-server php-fpm php-mysql php-cli php-curl php-gd php-mbstring php-xml php-zip unzip git
 
-echo "=== Instalando MariaDB Server y Galera ==="
-DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server mariadb-client galera-4 rsync
+echo "=== Creando directorio compartido ==="
+mkdir -p /var/www/html
 
-echo "=== Deteniendo MariaDB para configuración ==="
-systemctl stop mariadb || true
-killall -9 mysqld 2>/dev/null || true
-sleep 3
-
-echo "=== Configurando Galera Cluster ==="
-cat > /etc/mysql/mariadb.conf.d/60-galera.cnf <<'EOF'
-[mysqld]
-# Configuración básica
-bind-address = 0.0.0.0
-
-# Configuración de Galera
-wsrep_on = ON
-wsrep_provider = /usr/lib/galera/libgalera_smm.so
-
-# Cluster configuration
-wsrep_cluster_name = "galera_cluster"
-wsrep_cluster_address = "gcomm://192.168.40.11,192.168.40.12"
-
-# Node configuration
-wsrep_node_address = "192.168.40.12"
-wsrep_node_name = "serverdatos2ManuelSoltero"
-
-# SST method
-wsrep_sst_method = rsync
-
-# Configuración para replicación
-binlog_format = row
-default_storage_engine = InnoDB
-innodb_autoinc_lock_mode = 2
+echo "=== Configurando exportación NFS ==="
+cat > /etc/exports <<'EOF'
+/var/www/html 192.168.30.11(rw,sync,no_subtree_check,no_root_squash)
+/var/www/html 192.168.30.12(rw,sync,no_subtree_check,no_root_squash)
 EOF
 
-echo "=== Limpiando estado previo de Galera ==="
-rm -f /var/lib/mysql/grastate.dat
+exportfs -a
 
-echo "=== Esperando a que el nodo 1 esté disponible ==="
-echo "Esperando 40 segundos para que el cluster se inicialice en db1..."
-sleep 40
+echo "=== Configurando PHP-FPM para escuchar en todas las interfaces ==="
+PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 
+# Escuchar en 0.0.0.0:9000 para aceptar conexiones remotas
+sed -i 's/listen = \/run\/php\/php.*-fpm.sock/listen = 0.0.0.0:9000/' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 
+# Permitir conexiones solo desde los servidores web
+sed -i 's/;listen.allowed_clients/listen.allowed_clients/' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+sed -i '/listen.allowed_clients/d' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+echo "listen.allowed_clients = 192.168.30.11,192.168.30.12" >> /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
 
-echo "=== Iniciando MariaDB y uniéndose al cluster ==="
-systemctl start mariadb
+echo "=== Descargando aplicación de usuarios desde GitHub ==="
+cd /tmp
+git clone https://github.com/josejuansanchez/iaw-practica-lamp.git
+cp -r iaw-practica-lamp/src/* /var/www/html/
 
-echo "=== Esperando a que MariaDB esté disponible ==="
-sleep 15
+echo "=== Configurando la base de datos en la aplicación ==="
+cat > /var/www/html/config.php <<'EOF'
+<?php
+define('DB_HOST', '192.168.30.10:3306');
+define('DB_NAME', 'lamp_db');
+define('DB_USER', 'manuelsoltero');
+define('DB_PASSWORD', 'abcd');
 
-# Verificar que MariaDB está corriendo
+$mysqli = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-    
-    echo "=== Verificando estado del cluster ==="
-    mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" || echo "Esperando sincronización..."
-    sleep 5
-    mysql -e "SHOW STATUS LIKE 'wsrep_ready';" || echo "Esperando sincronización..."
-    
-    echo "=== Verificando replicación de datos ==="
-    mysql -e "USE lamp_db; SHOW TABLES;" 2>/dev/null || echo "Base de datos aún sincronizando..."
-    sleep 3
-    mysql -e "USE lamp_db; SELECT * FROM usuarios LIMIT 5;" 2>/dev/null || echo "Tablas aún sincronizando..."
+if (!$mysqli) {
+    die("Error de conexión: " . mysqli_connect_error());
+}
+?>
+EOF
 
+echo "=== Ajustando permisos ==="
+chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 
-echo "=== Habilitando MariaDB ==="
-systemctl enable mariadb
+echo "=== Reiniciando servicios ==="
+systemctl enable nfs-kernel-server
+systemctl restart nfs-kernel-server
+systemctl enable php$PHP_VERSION-fpm
+systemctl restart php$PHP_VERSION-fpm
 
-echo "=== Servidor de base de datos 2 (Galera Nodo 2) configurado correctamente ==="
-echo "=== Estado del cluster: ==="
-mysql -e "SHOW STATUS LIKE 'wsrep_%';" 2>/dev/null | grep -E "wsrep_cluster_size|wsrep_cluster_status|wsrep_ready|wsrep_connected" || echo "Nodo uniéndose al cluster..."
+echo "=== Verificando configuración PHP-FPM ==="
+netstat -tlnp | grep 9000 || ss -tlnp | grep 9000
+
+echo "=== Servidor NFS con PHP-FPM configurado correctamente ==="
+echo "PHP-FPM escuchando en: 0.0.0.0:9000"
+echo "NFS compartiendo: /var/www/html"
