@@ -697,3 +697,6 @@ echo "=== Servidor de base de datos 2 (Galera Nodo 2) configurado correctamente 
 echo "=== Estado del cluster: ==="
 mysql -e "SHOW STATUS LIKE 'wsrep_%';" 2>/dev/null | grep -E "wsrep_cluster_size|wsrep_cluster_status|wsrep_ready|wsrep_connected" || echo "Nodo uniéndose al cluster..."
 ```
+
+## Video de correcto funcionamiento
+[Comprobación de funcionaminto de la aplicación web](URL_del_enlace)
