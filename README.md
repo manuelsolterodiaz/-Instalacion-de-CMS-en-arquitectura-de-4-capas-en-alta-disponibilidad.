@@ -10,6 +10,7 @@ Contiene los ficheros VagrantFile y de aprovisionamiento necesarios para esta ta
 1. [Introducción](#id1)
 2. [Programas y herramientas](#id2)
 3. [Scripts](#id3)
+4. [Vídeo](#id4)
 
 # Introducción <a name="id1"></a>
 
@@ -698,5 +699,5 @@ echo "=== Estado del cluster: ==="
 mysql -e "SHOW STATUS LIKE 'wsrep_%';" 2>/dev/null | grep -E "wsrep_cluster_size|wsrep_cluster_status|wsrep_ready|wsrep_connected" || echo "Nodo uniéndose al cluster..."
 ```
 
-## Video de correcto funcionamiento
-[Comprobación de funcionaminto de la aplicación web](https://drive.google.com/file/d/1PTzicyl0dDoKvC_mrXgNUmVKqYSySxmj/view?usp=sharing)
+## Video de correcto funcionamiento <a name="id4"></a>
+[Comprobación de funcionamiento de la aplicación web](https://drive.google.com/file/d/1PTzicyl0dDoKvC_mrXgNUmVKqYSySxmj/view?usp=sharing)
