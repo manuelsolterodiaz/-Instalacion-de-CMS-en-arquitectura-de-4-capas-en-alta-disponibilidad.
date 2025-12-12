@@ -2,6 +2,7 @@
 
 # Script de aprovisionamiento del Servidor NFS con PHP-FPM
 # Capa 2 - Backend (Almacenamiento compartido y motor PHP)
+# Manuel Soltero Díaz
 
 echo "=== Actualizando sistema ==="
 apt-get update
